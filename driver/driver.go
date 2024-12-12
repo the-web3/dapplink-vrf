@@ -128,7 +128,7 @@ func (de *DriverEingine) isMaxPriorityFeePerGasNotFoundError(err error) bool {
 	return strings.Contains(err.Error(), errMaxPriorityFeePerGasNotFound.Error())
 }
 
-func (de *DriverEingine) requestRandomWords(ctx context.Context, requestId *big.Int, wordsNum *big.Int) (*types.Transaction, error) {
+func (de *DriverEingine) fulfillRandomWords(ctx context.Context, requestId *big.Int, randomList []*big.Int) (*types.Transaction, error) {
 	nonce, err := de.Cfg.ChainClient.NonceAt(ctx, de.Cfg.CallerAddress, nil)
 	if err != nil {
 		log.Error("get nonce error", "err", err)
@@ -144,7 +144,7 @@ func (de *DriverEingine) requestRandomWords(ctx context.Context, requestId *big.
 	opts.Nonce = new(big.Int).SetUint64(nonce)
 	opts.NoSend = true
 
-	tx, err := de.DappLinkVrfContract.RequestRandomWords(opts, requestId, wordsNum)
+	tx, err := de.DappLinkVrfContract.FulfillRandomWords(opts, requestId, randomList)
 	switch {
 	case err == nil:
 		return tx, nil
@@ -152,15 +152,15 @@ func (de *DriverEingine) requestRandomWords(ctx context.Context, requestId *big.
 	case de.isMaxPriorityFeePerGasNotFoundError(err):
 		log.Info("Don't support priority fee")
 		opts.GasTipCap = FallbackGasTipCap
-		return de.DappLinkVrfContract.RequestRandomWords(opts, requestId, wordsNum)
+		return de.DappLinkVrfContract.FulfillRandomWords(opts, requestId, randomList)
 
 	default:
 		return nil, err
 	}
 }
 
-func (de *DriverEingine) RequestRandomWords(requestId *big.Int, wordsNum *big.Int) (*types.Receipt, error) {
-	tx, err := de.requestRandomWords(de.Ctx, requestId, wordsNum)
+func (de *DriverEingine) FulfillRandomWords(requestId *big.Int, randomList []*big.Int) (*types.Receipt, error) {
+	tx, err := de.fulfillRandomWords(de.Ctx, requestId, randomList)
 	if err != nil {
 		log.Error("build request random words tx fail", "err", err)
 		return nil, err

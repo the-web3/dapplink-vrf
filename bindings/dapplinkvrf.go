@@ -93,7 +93,7 @@ type DappLinkVRFSession struct {
 // DappLinkVRFCallerSession is an auto generated read-only Go binding around an Ethereum contract,
 // with pre-set call options.
 type DappLinkVRFCallerSession struct {
-	Contract *DappLinkVRFCaller // Generic contract driver binding to set the session for
+	Contract *DappLinkVRFCaller // Generic contract caller binding to set the session for
 	CallOpts bind.CallOpts      // Call options to use throughout this session
 }
 
