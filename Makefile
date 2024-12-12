@@ -21,8 +21,8 @@ test:
 lint:
 	golangci-lint run ./...
 
-bindings:
-	binding-vrf & binding-factory
+bindings: binding-vrf binding-factory
+
 
 binding-vrf:
 	$(eval temp := $(shell mktemp))
