@@ -1,8 +1,6 @@
 package contracts
 
 import (
-	"context"
-	"fmt"
 	"math/big"
 	"time"
 
@@ -16,7 +14,6 @@ import (
 	"github.com/the-web3/dapplink-vrf/database"
 	"github.com/the-web3/dapplink-vrf/database/event"
 	"github.com/the-web3/dapplink-vrf/database/worker"
-	"github.com/the-web3/dapplink-vrf/synchronizer/retry"
 )
 
 type DappLinkVrf struct {
@@ -41,21 +38,22 @@ func NewDappLinkVrf() (*DappLinkVrf, error) {
 	}, nil
 }
 
-func (dvf *DappLinkVrf) ProcessDappLinkVrfEvent(db *database.DB, dappLinkVrfAddres string, startHeight, endHeight *big.Int) error {
+func (dvf *DappLinkVrf) ProcessDappLinkVrfEvent(db *database.DB, dappLinkVrfAddres string, startHeight, endHeight *big.Int) ([]worker.RequestSend, []worker.FillRandomWords, error) {
+	var RequestSentList []worker.RequestSend
+	var FillRandomWordList []worker.FillRandomWords
 	contactFilter := event.ContractEvent{ContractAddress: common.HexToAddress(dappLinkVrfAddres)}
 	contractEventList, err := db.ContractEvent.ContractEventsWithFilter(contactFilter, startHeight, endHeight)
 	if err != nil {
 		log.Error("query contacts event fail", "err", err)
-		return err
+		return RequestSentList, FillRandomWordList, err
 	}
-	var RequestSentList []worker.RequestSend
-	var FillRandomWordList []worker.FillRandomWords
+
 	for _, contractEvent := range contractEventList {
 		if contractEvent.EventSignature.String() == dvf.DlVrfAbi.Events["RequestSent"].ID.String() {
 			rquestSentEvent, err := dvf.DlVrfFilter.ParseRequestSent(*contractEvent.RLPLog)
 			if err != nil {
 				log.Error("parse request sent fail", "err", err)
-				return err
+				return RequestSentList, FillRandomWordList, err
 			}
 			log.Info("Request sent event", "RequestId", rquestSentEvent.RequestId, "NumWords", rquestSentEvent.NumWords, "Current", rquestSentEvent.Current)
 			rs := worker.RequestSend{
@@ -73,7 +71,7 @@ func (dvf *DappLinkVrf) ProcessDappLinkVrfEvent(db *database.DB, dappLinkVrfAddr
 			fillRandomWords, err := dvf.DlVrfFilter.ParseFillRandomWords(*contractEvent.RLPLog)
 			if err != nil {
 				log.Error("parse fill random fail", "err", err)
-				return err
+				return RequestSentList, FillRandomWordList, err
 			}
 			log.Info("Fill random words event", "RequestId", fillRandomWords.RequestId, "RandomWords", fillRandomWords.RandomWords)
 			var randomWords string
@@ -89,25 +87,5 @@ func (dvf *DappLinkVrf) ProcessDappLinkVrfEvent(db *database.DB, dappLinkVrfAddr
 			FillRandomWordList = append(FillRandomWordList, frw)
 		}
 	}
-
-	retryStrategy := &retry.ExponentialStrategy{Min: 1000, Max: 20_000, MaxJitter: 250}
-	if _, err := retry.Do[interface{}](context.Background(), 10, retryStrategy, func() (interface{}, error) {
-		if err := db.Transaction(func(tx *database.DB) error {
-			if err := tx.FillRandomWords.StoreFillRandomWords(FillRandomWordList); err != nil {
-				return err
-			}
-			if err := tx.RequestSend.StoreRequestSend(RequestSentList); err != nil {
-				return err
-			}
-			return nil
-		}); err != nil {
-			log.Info("unable to persist batch", err)
-			return nil, fmt.Errorf("unable to persist batch: %w", err)
-		}
-		return nil, nil
-	}); err != nil {
-		return err
-	}
-
-	return nil
+	return RequestSentList, FillRandomWordList, nil
 }

@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -13,6 +14,7 @@ type PoxyCreated struct {
 }
 
 type PoxyCreatedView interface {
+	QueryPoxyCreatedAddressList() ([]common.Address, error)
 }
 
 type PoxyCreatedDB interface {
@@ -32,4 +34,17 @@ func NewPoxyCreatedDB(db *gorm.DB) PoxyCreatedDB {
 func (db poxyCreatedDB) StorePoxyCreated(PoxyCreatedList []PoxyCreated) error {
 	result := db.gorm.Table("proxy_created").CreateInBatches(&PoxyCreatedList, len(PoxyCreatedList))
 	return result.Error
+}
+
+func (db poxyCreatedDB) QueryPoxyCreatedAddressList() ([]common.Address, error) {
+	var poxyCreatedList []PoxyCreated
+	err := db.gorm.Table("proxy_created").Find(&poxyCreatedList).Error
+	if err != nil {
+		return nil, fmt.Errorf("query proxy created failed: %w", err)
+	}
+	var addressList []common.Address
+	for _, poxyCreated := range poxyCreatedList {
+		addressList = append(addressList, poxyCreated.ProxyAddress)
+	}
+	return addressList, nil
 }

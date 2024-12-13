@@ -124,8 +124,14 @@ func (syncer *Synchronizer) processBatch(headers []types.Header, chainCfg *confi
 		header := headers[i]
 		headerMap[header.Hash()] = &header
 	}
-	log.Info("chainCfg Contracts", "contract address", chainCfg.Contracts[0])
-	filterQuery := ethereum.FilterQuery{FromBlock: firstHeader.Number, ToBlock: lastHeader.Number, Addresses: chainCfg.Contracts}
+
+	addressList, err := syncer.db.PoxyCreated.QueryPoxyCreatedAddressList()
+	if err != nil {
+		log.Error("QueryPoxyCreatedAddressList fail", "err", err)
+		return err
+	}
+
+	filterQuery := ethereum.FilterQuery{FromBlock: firstHeader.Number, ToBlock: lastHeader.Number, Addresses: addressList}
 	logs, err := syncer.ethClient.FilterLogs(filterQuery)
 	if err != nil {
 		log.Info("failed to extract logs", "err", err)

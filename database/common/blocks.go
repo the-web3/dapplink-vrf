@@ -27,6 +27,7 @@ func (BlockHeader) TableName() string {
 
 type BlocksView interface {
 	BlockHeader(common.Hash) (*BlockHeader, error)
+	BlockHeaderByNumber(*big.Int) (*BlockHeader, error)
 	BlockHeaderWithFilter(BlockHeader) (*BlockHeader, error)
 	BlockHeaderWithScope(func(db *gorm.DB) *gorm.DB) (*BlockHeader, error)
 	LatestBlockHeader() (*BlockHeader, error)
@@ -43,6 +44,10 @@ type blocksDB struct {
 
 func (b blocksDB) BlockHeader(hash common.Hash) (*BlockHeader, error) {
 	return b.BlockHeaderWithFilter(BlockHeader{Hash: hash})
+}
+
+func (b blocksDB) BlockHeaderByNumber(number *big.Int) (*BlockHeader, error) {
+	return b.BlockHeaderWithFilter(BlockHeader{Number: number})
 }
 
 func (b blocksDB) BlockHeaderWithFilter(header BlockHeader) (*BlockHeader, error) {
