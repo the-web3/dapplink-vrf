@@ -39,10 +39,10 @@ CREATE INDEX IF NOT EXISTS contract_events_contract_address ON contract_events(c
 
 CREATE TABLE IF NOT EXISTS event_blocks(
     guid        VARCHAR PRIMARY KEY,
-    hash        VARCHAR NOT NULL UNIQUE,
-    parent_hash VARCHAR NOT NULL UNIQUE,
-    number      UINT256 NOT NULL UNIQUE,
-    timestamp   INTEGER NOT NULL UNIQUE CHECK (timestamp > 0)
+    hash        VARCHAR NOT NULL,
+    parent_hash VARCHAR NOT NULL,
+    number      UINT256 NOT NULL,
+    timestamp   INTEGER NOT NULL CHECK (timestamp > 0)
 );
 CREATE INDEX IF NOT EXISTS event_blocks_timestamp ON event_blocks(timestamp);
 CREATE INDEX IF NOT EXISTS event_blocks_number ON event_blocks(number);
@@ -57,7 +57,7 @@ CREATE INDEX IF NOT EXISTS proxy_created_proxy_address ON proxy_created(proxy_ad
 CREATE TABLE IF NOT EXISTS request_sent (
     guid                          VARCHAR PRIMARY KEY,
     request_id                    UINT256 NOT NULL,
-    num_words                     SMALLINT NOT NULL,
+    num_words                     UINT256 NOT NULL,
     vrf_address                   VARCHAR NOT NULL,
     status                        SMALLINT NOT NULL DEFAULT 0,
     timestamp                     INTEGER NOT NULL CHECK (timestamp > 0)

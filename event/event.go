@@ -193,6 +193,6 @@ func (eh *EventsHandler) processEvent() error {
 	}); err != nil {
 		return err
 	}
-
+	eh.latestBlockHeader = latestBlockHeader
 	return nil
 }

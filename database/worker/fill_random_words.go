@@ -5,6 +5,8 @@ import (
 	"math/big"
 
 	"github.com/google/uuid"
+
+	_ "github.com/the-web3/dapplink-vrf/database/utils/serializers"
 )
 
 type FillRandomWords struct {

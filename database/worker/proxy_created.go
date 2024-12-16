@@ -2,9 +2,13 @@ package worker
 
 import (
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+
+	"github.com/ethereum/go-ethereum/common"
+
+	_ "github.com/the-web3/dapplink-vrf/database/utils/serializers"
 )
 
 type PoxyCreated struct {

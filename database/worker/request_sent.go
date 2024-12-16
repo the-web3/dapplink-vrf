@@ -9,6 +9,8 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/ethereum/go-ethereum/common"
+
+	_ "github.com/the-web3/dapplink-vrf/database/utils/serializers"
 )
 
 type RequestSend struct {
@@ -67,6 +69,6 @@ func (db requestSendDB) MarkRequestSendFinish(requestSent RequestSend) error {
 }
 
 func (db requestSendDB) StoreRequestSend(RequestSendList []RequestSend) error {
-	result := db.gorm.CreateInBatches(&RequestSendList, len(RequestSendList))
+	result := db.gorm.Table("request_sent").CreateInBatches(&RequestSendList, len(RequestSendList))
 	return result.Error
 }

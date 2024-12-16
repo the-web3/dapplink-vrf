@@ -10,6 +10,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+
+	_ "github.com/the-web3/dapplink-vrf/database/utils/serializers"
 )
 
 type ContractEvent struct {

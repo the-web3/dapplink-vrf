@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const envVarPrefix = "EVENT_WATCHER"
+const envVarPrefix = "DAPPLINKVRF"
 
 func prefixEnvVars(name string) []string {
 	return []string{envVarPrefix + "_" + name}
@@ -79,6 +79,18 @@ var (
 		EnvVars:  prefixEnvVars("DAPPLINK_VRF_ADDRESS"),
 		Required: true,
 	}
+	DappLinkVrfFactoryContractAddressFlag = &cli.StringFlag{
+		Name:     "dapplink-vrf-factory-address",
+		Usage:    "Address of the dapplink vrf factory",
+		EnvVars:  prefixEnvVars("DAPPLINK_VRF_FACTORY_ADDRESS"),
+		Required: true,
+	}
+	CallerAddressFlag = &cli.StringFlag{
+		Name:     "caller_address",
+		Usage:    "contract caller for dapplink vrf",
+		EnvVars:  prefixEnvVars("CALLER_ADDRESS"),
+		Required: true,
+	}
 	NumConfirmationsFlag = &cli.Uint64Flag{
 		Name: "num-confirmations",
 		Usage: "Number of confirmations which we will wait after " +
@@ -94,6 +106,7 @@ var (
 		EnvVars: prefixEnvVars("SAFE_ABORT_NONCE_TOO_LOW_COUNT"),
 		Value:   3,
 	}
+
 	MnemonicFlag = &cli.StringFlag{
 		Name: "mnemonic",
 		Usage: "The mnemonic used to derive the wallets for either the " +
@@ -142,20 +155,6 @@ var (
 		Name:     "master-db-name",
 		Usage:    "The db name of the master database",
 		EnvVars:  prefixEnvVars("MASTER_DB_NAME"),
-		Required: true,
-	}
-
-	HttpHostFlag = &cli.StringFlag{
-		Name:     "http-host",
-		Usage:    "The host of the api",
-		EnvVars:  prefixEnvVars("HTTP_HOST"),
-		Required: true,
-	}
-	HttpPortFlag = &cli.IntFlag{
-		Name:     "http-port",
-		Usage:    "The port of the api",
-		EnvVars:  prefixEnvVars("HTTP_PORT"),
-		Value:    8987,
 		Required: true,
 	}
 
@@ -209,16 +208,16 @@ var requiredFlags = []cli.Flag{
 	CallIntervalFlag,
 	PrivateKeyFlag,
 	DappLinkVrfContractAddressFlag,
+	DappLinkVrfFactoryContractAddressFlag,
+	CallerAddressFlag,
 	NumConfirmationsFlag,
 	SafeAbortNonceTooLowCountFlag,
-	MnemonicFlag,
-	CallerHDPathFlag,
 	SlaveDbEnableFlag,
-	HttpHostFlag,
-	HttpPortFlag,
 }
 
 var optionalFlags = []cli.Flag{
+	MnemonicFlag,
+	CallerHDPathFlag,
 	PassphraseFlag,
 	StartingHeightFlag,
 	ConfirmationsFlag,
